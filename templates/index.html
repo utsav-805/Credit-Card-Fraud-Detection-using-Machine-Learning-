@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Card Fraud Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin: 10px 0 5px;
+        }
+        input[type="number"], input[type="text"], button {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            text-align: center;
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Credit Card Fraud Detection</h1>
+        <form id="fraudForm">
+            <label for="Time">Time:</label>
+            <input type="number" id="Time" name="Time" required>
+
+            <label for="features">V1 to V28 (Comma-separated values):</label>
+            <input type="text" id="features" name="features" placeholder="Enter values like: 0.1, -1.2, 3.4, ..." required>
+
+            <label for="Amount">Amount:</label>
+            <input type="number" id="Amount" name="Amount" step="any" required>
+
+            <button type="button" onclick="submitForm()">Predict</button>
+        </form>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        // JavaScript for form submission
+        async function submitForm() {
+            const form = document.getElementById('fraudForm');
+            const formData = new FormData(form);
+            const jsonData = {};
+
+            formData.forEach((value, key) => {
+                if (key === "features") {
+                    // Convert comma-separated values into an array of numbers
+                    jsonData[key] = value.split(',').map(Number);
+                } else {
+                    jsonData[key] = parseFloat(value); // Convert other inputs to float
+                }
+            });
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(jsonData)
+                });
+
+                const result = await response.json();
+                document.getElementById('result').textContent = result.prediction 
+                    ? `Prediction: ${result.prediction}` 
+                    : `Error: ${result.error}`;
+            } catch (error) {
+                document.getElementById('result').textContent = 'Error communicating with the server.';
+            }
+        }
+    </script>
+</body>
+</html>
